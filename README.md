@@ -1,4 +1,4 @@
-# 🥫 Synthetic-to-Real Object Detection Challenge
+# Synthetic-to-Real Object Detection Challenge
 
 [![Kaggle](https://img.shields.io/badge/Kaggle-Competition-blue)](https://www.kaggle.com/competitions/synthetic-2-real-object-detection-challenge)
 ![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-red)
@@ -6,7 +6,7 @@
 
 ## 📖 Overview
 This repository contains my solution pipeline for the **Synthetic-to-Real Object Detection Challenge** on Kaggle.  
-The task: **train object detectors on synthetic images of soup cans** and generalize to **real test images**.  
+The task: **train object detectors on synthetic images of a cheerio box** and generalize to **real test images**.  
 The challenge highlights domain adaptation and sim-to-real transfer in computer vision.
 
 ---
@@ -14,17 +14,17 @@ The challenge highlights domain adaptation and sim-to-real transfer in computer 
 ## 📂 Repo Layout
 ```
 synthetic-to-real-detection/
-├─ data/ # training & test datasets
-├─ ENV_SETUP/ # environment setup files (requirements, setup scripts)
-├─ predictions/ # generated prediction CSVs & bounding box files
-├─ runs/ # YOLOv8 training outputs (weights, logs, metrics)
-├─ classes # text file with class labels
-├─ convert_preds_to_csv.py # converts YOLO predictions to Kaggle submission format
-├─ predict.py # run inference on test images
-├─ submission.xlsx # sample Kaggle submission
-├─ train.py # training script for YOLOv8 models
-├─ yolo_params.yaml # config file with YOLO hyperparameters
-└─ yolov8s.pt # pretrained YOLOv8 model weights
+├─ data/                                         # training & test datasets
+├─ ENV_SETUP/                                    # environment setup files (requirements, setup scripts)
+├─ predictions/                                  # generated prediction CSVs & bounding box files
+├─ runs/                                         # YOLOv8 training outputs (weights, logs, metrics)
+├─ classes                                       # text file with class labels
+├─ convert_preds_to_csv.py                       # converts YOLO predictions to Kaggle submission format
+├─ predict.py                                    # run inference on test images
+├─ submission.xlsx                               # my Kaggle submission
+├─ train.py                                      # training script for YOLOv8 models
+├─ yolo_params.yaml                              # config file with YOLO hyperparameters
+└─ yolov8s.pt                                    # pretrained YOLOv8 model weights
 
 ```
 
