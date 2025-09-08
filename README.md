@@ -53,13 +53,13 @@ Synthetic-to-Real Object Detection Challenge
 
 Place under data/:
 
-bash
+```bash
 
 data/
 ├─ train/      # synthetic images + labels
 ├─ test/       # real images
 └─ sample/     # sample_submission.csv
-
+```
 ---
 
 🚀 Usage
