@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# Jupyter / Logs
+.ipynb_checkpoints/
+*.log
+*.out
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Large ML files
+*.pt         # PyTorch model weights
+*.pth
+*.h5
+*.onnx
+*.ckpt
+*.npz
+*.npy
+
+# Kaggle / Competition
+submission.csv
+*.xlsx
+runs/              # YOLOv8 training outputs
+predictions/       # raw predictions
+data/              # datasets (not tracked in repo)
