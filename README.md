@@ -18,6 +18,9 @@ synthetic-to-real-detection/
 ├─ ENV_SETUP/                                    # environment setup files (requirements, setup scripts)
 ├─ predictions/                                  # generated prediction CSVs & bounding box files
 ├─ runs/                                         # YOLOv8 training outputs (weights, logs, metrics)
+├─ .gitignore
+├─ LICENSE
+├─ README.md
 ├─ classes                                       # text file with class labels
 ├─ convert_preds_to_csv.py                       # converts YOLO predictions to Kaggle submission format
 ├─ predict.py                                    # run inference on test images
