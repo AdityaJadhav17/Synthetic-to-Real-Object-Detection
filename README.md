@@ -2,131 +2,105 @@
 
 [![Kaggle](https://img.shields.io/badge/Kaggle-Competition-blue)](https://www.kaggle.com/competitions/synthetic-2-real-object-detection-challenge)
 ![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-red)
-![Python](https://img.shields.io/badge/Python-3.10+-green)
+![Python](https://img.shields.io/badge/Python-3.10-green)
 
-## 📖 Overview
-This repository contains my solution pipeline for the **Synthetic-to-Real Object Detection Challenge** on Kaggle.  
-The task: **train object detectors on synthetic images of a cheerio box** and generalize to **real test images**.  
-The challenge highlights domain adaptation and sim-to-real transfer in computer vision.
+My solo entry in the [Synthetic to Real Object Detection Challenge](https://www.kaggle.com/competitions/synthetic-2-real-object-detection-challenge) on Kaggle. The task is to train a detector on synthetic images of a Cheerios box only, then find the box in real photos.
 
----
+Case study: https://adityajadhav.dev/projects/synthetic-to-real/
 
-## 📂 Repo Layout
-```
-synthetic-to-real-detection/
-├─ data/                                         # training & test datasets
-├─ ENV_SETUP/                                    # environment setup files (requirements, setup scripts)
-├─ predictions/                                  # generated prediction CSVs & bounding box files
-├─ runs/                                         # YOLOv8 training outputs (weights, logs, metrics)
-├─ .gitignore
-├─ LICENSE
-├─ README.md
-├─ classes                                       # text file with class labels
-├─ convert_preds_to_csv.py                       # converts YOLO predictions to Kaggle submission format
-├─ predict.py                                    # run inference on test images
-├─ submission.xlsx                               # my Kaggle submission
-├─ train.py                                      # training script for YOLOv8 models
-├─ yolo_params.yaml                              # config file with YOLO hyperparameters
-└─ yolov8s.pt                                    # pretrained YOLOv8 model weights
+## Results
+
+Kaggle scores entries by mAP@50 (a predicted box counts when it overlaps the true box by at least half). The public leaderboard scores half of the real test images. The private leaderboard scores the other half and sets the final ranking.
+
+| Leaderboard | mAP@50 |
+|---|---|
+| Private (final ranking) | 0.91750 |
+| Public | 0.90738 |
+
+On the 69 synthetic validation images, the last epoch reached mAP@50 0.9935 and mAP@50-95 0.9746 (`runs/detect/train/results.csv`). The drop to 0.9175 on real photos is the sim-to-real gap the challenge measures.
+
+## What is here
+
+The organizers gave every entrant a starter kit: a YOLOv8 training script, a prediction script, a script that turns predictions into the submission file, and batch files that set up a Conda environment. This repository holds my versions of those files, the training run behind my submission, its predictions and the submitted CSV.
 
 ```
+├─ data/
+│  ├─ train/                  # 431 synthetic images and labels
+│  ├─ val/                    # 69 synthetic images and labels
+│  └─ test/images/            # real photos, no labels
+├─ ENV_SETUP/                 # Windows batch files that create the Conda environment
+├─ runs/detect/train/         # the saved training run: weights, args.yaml, results.csv
+├─ predictions/labels/        # one .txt of predicted boxes per test photo
+├─ classes.txt                # the single class name
+├─ yolo_params.yaml           # dataset paths and class names
+├─ train.py                   # fine-tunes YOLOv8s
+├─ predict.py                 # runs the best checkpoint over the test photos
+├─ convert_preds_to_csv.py    # builds the Kaggle submission file
+├─ submission.csv             # the file I submitted
+└─ yolov8s.pt                 # pretrained YOLOv8s weights
+```
 
----
+## The run
 
-## ⚙️ Setup
+`runs/detect/train/args.yaml` records the settings of the submitted run:
 
-### 1️⃣ Create Environment
+- YOLOv8s from its pretrained weights, every object treated as one class
+- 8 epochs on a CPU at 640 pixels, batch size 8, about 103 minutes
+- Adam optimizer, learning rate 0.0001
+- Ultralytics augmentation: mosaic 0.3, mixup 0.1, hue, saturation and brightness shifts, translation, scaling and horizontal flips. Rotation stayed at 0 degrees.
+
+Prediction uses a confidence threshold of 0.015. mAP ranks boxes by confidence, so a weak box that turns out right still counts.
+
+## Setup
+
+The environment scripts are Windows batch files and need Miniconda or Anaconda.
+
+```bat
+git clone https://github.com/AdityaJadhav17/Synthetic-to-Real-Object-Detection.git
+cd Synthetic-to-Real-Object-Detection\ENV_SETUP
+setup_env.bat
+conda activate EDU
+```
+
+`setup_env.bat` creates a Conda environment named `EDU` with Python 3.10 and installs PyTorch, Torchvision, Ultralytics and OpenCV. On another system, install those four packages yourself.
+
+The dataset is already in `data/`. `yolo_params.yaml` points the scripts at it.
+
+## Usage
+
+Train. Every setting has a default in `train.py`, and each can be overridden on the command line:
+
 ```bash
-# clone repo
-git clone https://github.com/your-username/synthetic-to-real-detection.git
-cd synthetic-to-real-detection
-
-# create environment
-python -m venv venv
-source venv/bin/activate   # Linux/Mac
-venv\Scripts\activate      # Windows
-
-# install dependencies
-pip install -r ENV_SETUP/requirements.txt
+python train.py
+python train.py --epochs 8 --mosaic 0.3 --mixup 0.1 --lr0 0.0001
 ```
-2️⃣ Download Dataset
-Download from the Kaggle competition:
 
-Synthetic-to-Real Object Detection Challenge
-
-Place under data/:
+Predict. The script takes no arguments. It loads `best.pt` from the training run under `runs/detect/`, reads the test path from `yolo_params.yaml`, and writes one `.txt` per photo to `predictions/labels/`:
 
 ```bash
-
-data/
-├─ train/      # synthetic images + labels
-├─ test/       # real images
-└─ sample/     # sample_submission.csv
+python predict.py
 ```
----
 
-🚀 Usage
+Build the submission file:
 
-Train YOLOv8
 ```bash
-python train.py --config yolo_params.yaml
-Run Inference
-
-python predict.py --weights runs/train/exp/weights/best.pt --source data/test/
-Convert Predictions to Submission
-
-python convert_preds_to_csv.py --predictions predictions/ --output submission.csv
-Upload submission.csv to Kaggle for evaluation.
+python convert_preds_to_csv.py --preds_folder predictions/labels --test_images_folder data/test/images --output_csv submission.csv
 ```
----
 
-🧪 Experiments
+Upload `submission.csv` to Kaggle.
 
-Baseline: YOLOv8s pretrained on COCO → fine-tuned on synthetic dataset
+## Limits
 
-Augmentations: applied color jitter, blur, random rotations
+- The validation images are synthetic, so the score during training says little about real photos. There are no labelled real images here to check against before submitting.
+- I also tried YOLOv8n and YOLOv8m and stronger augmentation. Only the YOLOv8s run was kept, so this repository cannot show what those experiments found.
+- The organizers' original starter scripts are not kept here, so the history does not show which lines of the three scripts are mine.
+- Eight epochs on a CPU is a short run, and with one run there is no measure of how much the score moves between runs.
 
-Domain Randomization: experimented with synthetic filtering & stronger augmentations
+## License
 
-Model Variants: tested YOLOv8n/s/m with different hyperparameters
+MIT. See [LICENSE](LICENSE).
 
----
+## Acknowledgments
 
-📊 Results
-
-Final Kaggle leaderboard scores:
-
-Dataset Split	mAP Score
-Public LB	0.91750
-Private LB	0.90738
-
-🏆 Achieved Top-tier performance (>0.90 mAP) on both public and private leaderboards, showing strong generalization across the sim-to-real domain gap.
-
----
-
-🔑 Key Learnings
-
-Synthetic data is powerful, but augmentation and domain randomization are critical to bridge the sim-to-real gap.
-
-Smaller models (YOLOv8n/s) train faster but may underfit; larger backbones (YOLOv8m) improve generalization.
-
-Pretraining on large datasets like COCO followed by fine-tuning on synthetic data accelerates convergence.
-
-Data quality matters: filtering out unrealistic synthetic samples improved robustness.
-
----
-
-📜 License
-This project is licensed under the MIT License.
-
----
-
-🙌 Acknowledgments
-
-Ultralytics YOLOv8
-
-Kaggle Competition
-
-Duality AI for organizing and hosting the dataset
-
----
+- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics)
+- Duality AI, for organizing the competition and providing the dataset and starter scripts
